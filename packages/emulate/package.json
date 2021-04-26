@@ -1,0 +1,52 @@
+{
+  "name": "emulate",
+  "version": "1.0.0",
+  "main": "app.js",
+  "author": "uznam8x",
+  "license": "MIT",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development electron .",
+    "build": "cross-env NODE_ENV=production electron-builder --mac"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "devDependencies": {
+    "electron": "12.0.5",
+    "electron-builder": "22.10.5"
+  },
+  "build": {
+    "extends": null,
+    "productName": "WebViewers",
+    "appId": "com.uznam8x.wv",
+    "asar": true,
+    "protocols": {
+      "name": "WebViewers",
+      "schemes": [
+        "WebViewers"
+      ]
+    },
+    "mac": {
+      "target": [
+        "default"
+      ],
+      "icon": "./resources/logo.icns"
+    },
+    "dmg": {
+      "title": "Web Viewers",
+      "icon": "./resources/logo.icns"
+    },
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist/",
+      "app": "."
+    },
+    "files": [
+      "build/**/*",
+      "app.js",
+      "preload.js",
+      "navigator.js",
+      "package.json"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "webviewers",
+  "version": "1.0.0",
+  "description": "web viewers",
+  "main": "index.js",
+  "author": "uznam8x",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "emulate": "yarn workspace emulate",
+    "views": "yarn workspace views",
+    "start": "concurrently \"cross-env BROWSER=none yarn views start\" \"wait-on http://localhost:3000 && yarn emulate start\"",
+    "build": "yarn views build && rm -rf ./packages/emulate/build && mv ./packages/views/build ./packages/emulate &&yarn emulate build && rm -rf ./packages/emulate/build",
+    "lerna": "lerna"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  },
+  "dependencies": {
+    "concurrently": "^6.0.2",
+    "wait-on": "^5.3.0"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "electron"
+    ]
+  }
+}
