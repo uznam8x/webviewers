@@ -1,15 +1,13 @@
 import { createContext } from "react";
 
-const initalize = {
-  status: {
-      location: '',
-  },
-  canBackward: () => false,
-  canForward: () => false,
-  backward: () => {},
-  forward: () => {},
-  push: (url: string) => {},
-  
+type ContextType = {
+  browser: any;
+  isDesktop: boolean;
+  toggleDesktop: () => void;
 };
 
-export default createContext(initalize);
+export default createContext<ContextType>({
+  browser: {},
+  isDesktop: false,
+  toggleDesktop: () => {},
+});

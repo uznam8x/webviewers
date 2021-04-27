@@ -1,9 +1,9 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { BrowserType } from "~/store/browsers";
 import * as styles from "./styles";
 import Toolbar from "./Toolbar";
 import Viewer from "./Viewer";
-// import useHistory from "~/hooks/useHistory";
+import Context from "./context";
 export type Props = {
   className?: string;
   children?: React.ReactNode;
@@ -13,16 +13,28 @@ export type Props = {
 };
 
 function Webview({ value }: Props) {
-  const browser = value;
-  const [config, setConfig] = useState({ toolbar: { desktop: true } });
-  const handleChange = (config: any) => {
-    setConfig((state) => ({ ...state, ...config }));
+  const [config, setConfig] = useState<any>({
+    isDesktop: false,
+    browser: null,
+  });
+  const toggleDesktop = () => {
+    setConfig((state: any) => ({ ...state, isDesktop: !state.isDesktop }));
   };
-  return browser ? (
-    <div css={styles.container}>
-      <Toolbar browser={browser} onChange={handleChange} />
-      <Viewer browser={browser} config={config} />
-    </div>
+
+  const handleConfigUpdate = () => {
+    setConfig((state: any) => ({ ...state, browser: value }));
+    return () => {};
+  };
+
+  useEffect(handleConfigUpdate, [value]);
+
+  return config.browser ? (
+    <Context.Provider value={{ ...config, toggleDesktop }}>
+      <div css={styles.container}>
+        <Toolbar />
+        <Viewer />
+      </div>
+    </Context.Provider>
   ) : null;
 }
 
