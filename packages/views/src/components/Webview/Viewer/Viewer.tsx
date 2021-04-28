@@ -16,8 +16,26 @@ const getUserAgent = (isDesktop: boolean) =>
 function Viewer() {
   const { setStatus, setViewer, ...status } = useContext(context);
 
-  const navigator: any = useRef<any>({});
+  const {
+    id,
+    isFullscreen,
+    isLoading,
+    location,
+    mode,
+    canBackward,
+    canForward,
+  } = status;
+  let navigator: any = {
+    id,
+    isFullscreen,
+    isLoading,
+    location,
+    mode,
+    canBackward,
+    canForward,
+  };
 
+  console.log("Viewer", JSON.parse(JSON.stringify(navigator)));
   const config = {
     autosize: "on",
     webpreferences: "allowRunningInsecureContent=yes",
@@ -27,30 +45,24 @@ function Viewer() {
 
   const ref = useRef<any>(null);
   const handleCheck = (e: any) => {
-    if (
-      ["did-navigate", "did-navigate-in-page", "did-finish-load"].includes(
-        e.type
-      )
-    ) {
-      let res = R.mergeDeepLeft({
-        id: status.id,
-        mode: status.mode,
-        ...(!!e.url && { location: e.url }),
-        canBackward: e.target.canGoBack(),
-        canForward: e.target.canGoForward(),
-        isLoading: e.target.isLoading(),
-      })(navigator.current);
+    let res = R.mergeDeepLeft({
+      ...(!!e.url && { location: e.url }),
+      canBackward: e.target.canGoBack(),
+      canForward: e.target.canGoForward(),
+      isLoading: e.target.isLoading(),
+    })(navigator);
 
-      if (JSON.stringify(navigator.current) !== JSON.stringify(res)) {
-        navigator.current = res;
-        setStatus(res);
-      }
+    if (!R.equals(navigator, res)) {
+      console.log("event", JSON.stringify(navigator), JSON.stringify(res));
+      navigator = JSON.parse(JSON.stringify(res));
+      setStatus(navigator);
     }
+    
   };
 
   const init = () => {
     const { current } = ref;
-    current.addEventListener("load-commit", handleCheck);
+    //current.addEventListener("load-commit", handleCheck);
     current.addEventListener("will-navigate", handleCheck);
     current.addEventListener("did-navigate", handleCheck);
     current.addEventListener("did-navigate-in-page", handleCheck);
@@ -61,7 +73,7 @@ function Viewer() {
     current.addEventListener("did-finish-load", handleCheck);
 
     return () => {
-      current.removeEventListener("load-commit", handleCheck);
+      //current.removeEventListener("load-commit", handleCheck);
       current.removeEventListener("will-navigate", handleCheck);
       current.removeEventListener("did-navigate", handleCheck);
       current.removeEventListener("did-navigate-in-page", handleCheck);
@@ -73,7 +85,7 @@ function Viewer() {
     };
   };
 
-  useEffect(init, []);
+  useEffect(init, [navigator]);
 
   useEffect(() => {
     setViewer(ref.current);

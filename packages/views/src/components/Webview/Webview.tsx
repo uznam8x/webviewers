@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { DESTROY, FrameType, UPDATE } from "~/store/browsers";
 import Context from "./context";
 import StatusBar from "./StatusBar";
+import * as R from 'ramda';
 import * as styles from "./styles";
 import Toolbar from "./Toolbar";
 import Viewer from "./Viewer";
@@ -26,7 +27,9 @@ function Webview({ value }: Props) {
     isFullscreen: false,
   });
 
-  const [config, setConfig] = useState<any>({ ...status.current, ...value });
+  const [config, setConfig] = useState<any>(
+    R.mergeDeepLeft(value)(status.current)
+  );
   const [viewer, setViewer] = useState<any>(null);
 
   const dispatch = useDispatch();

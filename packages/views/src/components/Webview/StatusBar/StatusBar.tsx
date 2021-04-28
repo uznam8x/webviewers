@@ -10,27 +10,20 @@ import { Row, Col } from "antd";
 import * as styles from "./styles";
 
 export type Props = {
-  className?: string;
-  children?: React.ReactNode;
   [key: string]: any;
 };
 
-function StatusBar({ className = "", css = {}, children, ...args }: Props) {
+function StatusBar({ children, ...args }: Props) {
   const { view } = useSelector((state: any) => state);
-  const {
-    id,
-    isLoading,
-    isFullscreen,
-    mode = "mobile",
-    setStatus,
-    ...status
-  } = useContext(context);
+  const { id, isLoading, isFullscreen, setStatus, ...status } = useContext(
+    context
+  );
 
   const handleDesktop = () => {
     setStatus({
       ...status,
       id,
-      mode: mode === "mobile" ? "desktop" : "mobile",
+      mode: status.mode === "mobile" ? "desktop" : "mobile",
     });
   };
   const handleFullscreen = () => {
@@ -51,7 +44,7 @@ function StatusBar({ className = "", css = {}, children, ...args }: Props) {
         <Col>
           <button
             type="button"
-            css={[styles.button, styles.desktop(mode === "desktop")]}
+            css={[styles.button, styles.desktop(status.mode === "desktop")]}
             onClick={handleDesktop}
           >
             <DesktopOutlined />
