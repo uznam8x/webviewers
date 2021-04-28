@@ -8,6 +8,7 @@ export type Props = {
   [key: string]: any;
 };
 
+let timeout: any = null;
 const getUserAgent = (isDesktop: boolean) =>
   isDesktop
     ? "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36"
@@ -35,7 +36,6 @@ function Viewer() {
     canForward,
   };
 
-  console.log("Viewer", JSON.parse(JSON.stringify(navigator)));
   const config = {
     autosize: "on",
     webpreferences: "allowRunningInsecureContent=yes",
@@ -53,11 +53,13 @@ function Viewer() {
     })(navigator);
 
     if (!R.equals(navigator, res)) {
-      console.log("event", JSON.stringify(navigator), JSON.stringify(res));
       navigator = JSON.parse(JSON.stringify(res));
-      setStatus(navigator);
     }
-    
+
+    if (["dom-ready", "did-finish-load", "did-stop-loading"].includes(e.type)) {
+      clearTimeout(timeout);
+      timeout = setTimeout(setStatus, 100, navigator);
+    }
   };
 
   const init = () => {
