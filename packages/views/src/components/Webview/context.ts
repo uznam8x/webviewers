@@ -3,6 +3,8 @@ import { createContext } from "react";
 type ContextType = {
   id: string;
   viewer: any;
+  location: string;
+  title: string;
   setStatus: (state: any) => void;
   setViewer: (viewer: any) => void;
   goBackard: () => void;
@@ -14,8 +16,8 @@ type ContextType = {
 export default createContext<ContextType>({
   id: "",
   viewer: {},
+  title: "",
   location: "",
-  isLoading: false,
   isFullscreen: false,
   canGoBackward: false,
   canGoForward: false,

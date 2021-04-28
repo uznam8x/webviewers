@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { DESTROY, FrameType, UPDATE } from "~/store/browsers";
 import Context from "./context";
 import StatusBar from "./StatusBar";
-import * as R from 'ramda';
+import * as R from "ramda";
 import * as styles from "./styles";
 import Toolbar from "./Toolbar";
 import Viewer from "./Viewer";
@@ -17,7 +17,6 @@ export type Props = {
 };
 
 function Webview({ value }: Props) {
-  const timeout = useRef<any>(null);
   const status = useRef({
     id: "",
     mode: "mobile",
@@ -30,23 +29,16 @@ function Webview({ value }: Props) {
   const [config, setConfig] = useState<any>(
     R.mergeDeepLeft(value)(status.current)
   );
-  const [viewer, setViewer] = useState<any>(null);
+  const [viewer, setViewer] = useState<any>({ src: "about:blank" });
 
   const dispatch = useDispatch();
 
   const handleStatus = (payload: any) => {
-    clearTimeout(timeout.current);
-
-    status.current = { ...status.current, ...payload };
-    timeout.current = setTimeout(() => {
-      setConfig(() => status.current);
-    }, 1);
+    setConfig((state: any) => R.mergeDeepLeft(payload)(state));
   };
 
-  // dispatch(UPDATE(res));
   const handleGoBackward = () => {
     if (viewer !== null) {
-      (viewer as any).goBack();
       (viewer as any).goBack();
     }
   };

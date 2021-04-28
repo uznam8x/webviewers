@@ -11,6 +11,23 @@ export const button = css`
   height: 28px;
   cursor: pointer;
 `;
+
+export const loading = css`
+  display: none;
+
+  .webview--loading & {
+    display: block;
+    padding-left: 4px;
+  }
+`;
+
+export const title = css`
+  padding-left: 6px;
+  line-height: 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+`;
 export const fullscreen = (isFullscreen: boolean) =>
   isFullscreen
     ? css`

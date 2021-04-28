@@ -31,7 +31,7 @@ function Toolbar({ children, onChange = () => {}, ...args }: Props) {
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       if (status.location !== e.currentTarget.value) {
-        const location = ("https://" + e.currentTarget.value).replace(
+        const location = ("http://" + e.currentTarget.value).replace(
           /http[s]?:\/\/(http[s]?:\/\/)(.+)/g,
           ($1, $2, $3) => $2 + $3
         );

@@ -1,14 +1,14 @@
 import { jsx } from "@emotion/react";
+import * as R from "ramda";
 import { useContext, useEffect, useRef } from "react";
+import URL from "url-parse";
 import context from "../context";
 import * as styles from "./styles";
-import * as R from "ramda";
 export type Props = {
   onChanged?: (url: string) => void;
   [key: string]: any;
 };
 
-let timeout: any = null;
 const getUserAgent = (isDesktop: boolean) =>
   isDesktop
     ? "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36"
@@ -17,24 +17,15 @@ const getUserAgent = (isDesktop: boolean) =>
 function Viewer() {
   const { setStatus, setViewer, ...status } = useContext(context);
 
-  const {
-    id,
-    isFullscreen,
-    isLoading,
+  const { location, canBackward, canForward, title } = status;
+
+  let navigator: any = useRef<any>({
     location,
-    mode,
     canBackward,
     canForward,
-  } = status;
-  let navigator: any = {
-    id,
-    isFullscreen,
-    isLoading,
-    location,
-    mode,
-    canBackward,
-    canForward,
-  };
+  });
+
+  const mode = useRef(status.mode);
 
   const config = {
     autosize: "on",
@@ -43,28 +34,52 @@ function Viewer() {
     enableremotemodule: "false",
   };
 
-  const ref = useRef<any>(null);
-  const handleCheck = (e: any) => {
-    let res = R.mergeDeepLeft({
-      ...(!!e.url && { location: e.url }),
+  const flow = useRef<any>([]);
+  const ref = useRef<any>({ src: "" });
+
+  const update = (e: any, src: string) => {
+    navigator.current = R.mergeDeepLeft({
+      location: src,
+      title: e.target.getTitle(),
       canBackward: e.target.canGoBack(),
       canForward: e.target.canGoForward(),
-      isLoading: e.target.isLoading(),
-    })(navigator);
+    })(navigator.current);
 
-    if (!R.equals(navigator, res)) {
-      navigator = JSON.parse(JSON.stringify(res));
+    if (e.target.getTitle() !== status.title || src !== status.location) {
+      const res = R.mergeDeepLeft(navigator.current)({
+        location,
+        canBackward,
+        canForward,
+        title,
+      });
+      setStatus(res);
     }
-
-    if (["dom-ready", "did-finish-load", "did-stop-loading"].includes(e.type)) {
-      clearTimeout(timeout);
-      timeout = setTimeout(setStatus, 100, navigator);
+  };
+  const handleCheck = (e: any) => {
+    let src = e.target.src;
+    if (!!src && /^http[s]?:\/\//g.test(src)) {
+      src = URL(src).toString();
+    }
+    flow.current.push({ type: e.type, src });
+    if (e.type === "did-start-loading") {
+      ref.current.parentNode?.parentNode?.classList.add("webview--loading");
+    }
+    if (e.type === "did-stop-loading") {
+      if (
+        !R.equals(flow.current.map((v: any) => v.type))([
+          "did-start-loading",
+          "did-stop-loading",
+        ])
+      ) {
+        setTimeout(update, 10, e, src);
+      }
+      ref.current.parentNode?.parentNode?.classList.remove("webview--loading");
+      flow.current = [];
     }
   };
 
   const init = () => {
     const { current } = ref;
-    //current.addEventListener("load-commit", handleCheck);
     current.addEventListener("will-navigate", handleCheck);
     current.addEventListener("did-navigate", handleCheck);
     current.addEventListener("did-navigate-in-page", handleCheck);
@@ -74,8 +89,9 @@ function Viewer() {
     current.addEventListener("did-stop-loading", handleCheck);
     current.addEventListener("did-finish-load", handleCheck);
 
+    ref.current.src = status.location;
+    setViewer(ref.current);
     return () => {
-      //current.removeEventListener("load-commit", handleCheck);
       current.removeEventListener("will-navigate", handleCheck);
       current.removeEventListener("did-navigate", handleCheck);
       current.removeEventListener("did-navigate-in-page", handleCheck);
@@ -87,22 +103,29 @@ function Viewer() {
     };
   };
 
-  useEffect(init, [navigator]);
+  useEffect(init, []);
 
   useEffect(() => {
-    setViewer(ref.current);
-  }, [ref.current]);
+    if (ref.current.src !== status.location) {
+      ref.current.src = status.location;
+    }
+    return () => {};
+  }, [status.location]);
+
+  useEffect(() => {
+    if (status.mode !== mode.current) {
+      window.location.reload();
+    }
+    return () => {};
+  }, [status.mode]);
 
   return (
     <div css={styles.container}>
       {jsx("webview", {
-        key: status.id,
         ref,
-        src: status.location,
         ...config,
       })}
     </div>
   );
 }
-
 export default Viewer;

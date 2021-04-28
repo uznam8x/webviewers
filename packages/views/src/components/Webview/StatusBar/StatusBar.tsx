@@ -2,11 +2,13 @@ import {
   DesktopOutlined,
   CompressOutlined,
   ExpandOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import { memo, useContext } from "react";
 import { useSelector } from "react-redux";
 import context from "../context";
 import { Row, Col } from "antd";
+import * as R from "ramda";
 import * as styles from "./styles";
 
 export type Props = {
@@ -15,31 +17,29 @@ export type Props = {
 
 function StatusBar({ children, ...args }: Props) {
   const { view } = useSelector((state: any) => state);
-  const { id, isLoading, isFullscreen, setStatus, ...status } = useContext(
-    context
-  );
+  const { setStatus, ...status } = useContext(context);
 
   const handleDesktop = () => {
-    setStatus({
-      ...status,
-      id,
+    const res = R.mergeDeepLeft({
       mode: status.mode === "mobile" ? "desktop" : "mobile",
-    });
+    })(status);
+
+    setStatus(res);
   };
   const handleFullscreen = () => {
-    setStatus({
-      ...status,
-      id,
-      isFullscreen: !isFullscreen,
-    });
+    const res = R.mergeDeepLeft({
+      isFullscreen: !status.isFullscreen,
+    })(status);
+    setStatus(res);
   };
 
   return view.statusbar ? (
     <div css={styles.container} {...args}>
       <Row align="middle" wrap={false}>
-        <Col css={{ paddingLeft: 8 }}>
-          {isLoading ? "loading..." : "loaded"}
+        <Col css={styles.loading}>
+          <LoadingOutlined />
         </Col>
+        <Col css={styles.title}>{status.title}</Col>
         <Col flex={1}></Col>
         <Col>
           <button
@@ -53,10 +53,10 @@ function StatusBar({ children, ...args }: Props) {
         <Col>
           <button
             type="button"
-            css={[styles.button, styles.fullscreen(isFullscreen)]}
+            css={[styles.button, styles.fullscreen(status.isFullscreen)]}
             onClick={handleFullscreen}
           >
-            {isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
+            {status.isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
           </button>
         </Col>
       </Row>
