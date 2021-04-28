@@ -25,6 +25,11 @@ function Home() {
   const handleStatusbar = () => {
     dispatch(STATUSBAR());
   };
+  const handleClearCache = () => {
+    console.log('clear');
+    window.localStorage.setItem("__BROWSERS__", JSON.stringify({}));
+    window.location.reload();
+  };
 
   const position: any = [
     [{ width: "100%", height: "100%" }],
@@ -81,13 +86,15 @@ function Home() {
 
   const init = () => {
     ipc.on("app.add.browser", handleRegister.bind(null));
-    ipc.on("app.view.toolbar", handleToolbar);
-    ipc.on("app.view.statusbar", handleStatusbar);
+    ipc.on("app.tools.tool_bar", handleToolbar);
+    ipc.on("app.tools.status_bar", handleStatusbar);
+    ipc.on("app.tools.clear_cache", handleClearCache);
 
     return () => {
       ipc.removeListener("app.add.browser", handleRegister);
-      ipc.removeListener("app.view.toolbar", handleToolbar);
-      ipc.removeListener("app.view.statusbar", handleToolbar);
+      ipc.removeListener("app.tools.tool_bar", handleToolbar);
+      ipc.removeListener("app.tools.status_bar", handleToolbar);
+      ipc.removeListener("app.tools.clear_cache", handleClearCache);
     };
   };
   useEffect(init, []);

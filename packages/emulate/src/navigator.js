@@ -17,7 +17,7 @@ function navigator(window) {
           click: () => {
             app.quit();
           },
-        },
+        }
       ],
     },
     {
@@ -33,7 +33,7 @@ function navigator(window) {
       ],
     },
     {
-      label: "View",
+      label: "Tools",
       submenu: [
         {
           label: "Reload",
@@ -46,14 +46,14 @@ function navigator(window) {
           label: "Toggle Toolbar",
           accelerator: "Ctrl+Command+T",
           click: () => {
-            window.webContents.send("app.view.toolbar", {});
+            window.webContents.send("app.tools.tool_bar", {});
           },
         },
         {
           label: "Toggle Statusbar",
           accelerator: "Ctrl+Command+S",
           click: () => {
-            window.webContents.send("app.view.statusbar", {});
+            window.webContents.send("app.tools.status_bar", {});
           },
         },
         {
@@ -61,6 +61,13 @@ function navigator(window) {
           accelerator: "Ctrl+Command+F",
           click: () => {
             window.setFullScreen(!window.isFullScreen());
+          },
+        },
+        {
+          label: "Clear cache",
+          accelerator: "Ctrl+Command+C",
+          click: () => {
+            window.webContents.send("app.tools.clear_cache", {});
           },
         },
       ],
