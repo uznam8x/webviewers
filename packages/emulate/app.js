@@ -1,6 +1,6 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
-const navigator = require("./navigator");
+const navigator = require("./src/navigator");
 isDev = process.env.NODE_ENV === "development";
 
 function createWindow() {
@@ -13,7 +13,7 @@ function createWindow() {
       webviewTag: true,
       enableRemoteModule: true,
       contextIsolation: false,
-      preload: `${__dirname}/preload.js`,
+      preload: `${__dirname}/src/preload.js`,
     },
   });
 

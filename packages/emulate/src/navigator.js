@@ -44,9 +44,16 @@ function navigator(window) {
         },
         {
           label: "Toggle Toolbar",
-          accelerator: "Command+T",
+          accelerator: "Ctrl+Command+T",
           click: () => {
             window.webContents.send("app.view.toolbar", {});
+          },
+        },
+        {
+          label: "Toggle Statusbar",
+          accelerator: "Ctrl+Command+S",
+          click: () => {
+            window.webContents.send("app.view.statusbar", {});
           },
         },
         {

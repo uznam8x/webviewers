@@ -3,27 +3,27 @@ import { useDispatch, useSelector } from "react-redux";
 import Webview from "~/components/Webview";
 import { RootState } from "~/store";
 import { REGISTER } from "~/store/browsers";
-import { TOOLBAR } from "~/store/view";
-import str from "~/utils/str";
+import { TOOLBAR, STATUSBAR } from "~/store/view";
 import ipc from "./ipc";
 import * as styles from "./styles";
 
 function Home() {
-  const { browsers } = useSelector((state: RootState) => state);
+  const { frames } = useSelector((state: RootState) => state.browsers);
   const dispatch = useDispatch();
-  const entries: any = Object.entries(browsers);
-  const handleRegister = (location: string = "about:blank") => {
+
+  const handleRegister = () => {
     dispatch(
       REGISTER({
-        id: str.random(),
-        location,
-        action: "register",
+        location: "about:blank",
       })
     );
   };
 
   const handleToolbar = () => {
     dispatch(TOOLBAR());
+  };
+  const handleStatusbar = () => {
+    dispatch(STATUSBAR());
   };
 
   const position: any = [
@@ -80,29 +80,29 @@ function Home() {
   ];
 
   const init = () => {
-    ipc.on("app.add.browser", () => {
-      handleRegister();
-    });
+    ipc.on("app.add.browser", handleRegister.bind(null));
     ipc.on("app.view.toolbar", handleToolbar);
+    ipc.on("app.view.statusbar", handleStatusbar);
 
     return () => {
       ipc.removeListener("app.add.browser", handleRegister);
       ipc.removeListener("app.view.toolbar", handleToolbar);
+      ipc.removeListener("app.view.statusbar", handleToolbar);
     };
   };
   useEffect(init, []);
   return (
     <div css={styles.container}>
-      {entries.length ? (
+      {frames.length ? (
         <div css={styles.row}>
-          {entries.map(([key, value]: any, i: number) => {
+          {frames.map((frame: any, i: number) => {
             return (
               <div
                 css={styles.col}
-                key={i}
-                style={{ ...(position[entries.length - 1][i] as any) }}
+                key={frame.id}
+                style={{ ...(position[frames.length - 1][i] as any) }}
               >
-                <Webview value={value} />
+                <Webview value={frame} />
               </div>
             );
           })}

@@ -1,10 +1,8 @@
 import { jsx } from "@emotion/react";
 import { useContext, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
-import { PUSH } from "~/store/browsers";
-import context from "./context";
+import context from "../context";
 import * as styles from "./styles";
-
+import * as R from "ramda";
 export type Props = {
   onChanged?: (url: string) => void;
   [key: string]: any;
@@ -16,31 +14,44 @@ const getUserAgent = (isDesktop: boolean) =>
     : "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
 
 function Viewer() {
-  const { isDesktop, browser } = useContext(context);
+  const { setStatus, setViewer, ...status } = useContext(context);
+
+  const navigator: any = useRef<any>({});
 
   const config = {
     autosize: "on",
     webpreferences: "allowRunningInsecureContent=yes",
-    useragent: getUserAgent(isDesktop),
-    plugins: "true",
+    useragent: getUserAgent(status.mode === "desktop"),
+    enableremotemodule: "false",
   };
 
-  const dispatch = useDispatch();
   const ref = useRef<any>(null);
-  const handleNavigate = (e: any) => {
-    if (e.url !== browser.location) {
-      dispatch(PUSH({ [browser.id]: { location: e.url } }));
+  const handleCheck = (e: any) => {
+    if (
+      ["did-navigate", "did-navigate-in-page", "did-finish-load"].includes(
+        e.type
+      )
+    ) {
+      let res = R.mergeDeepLeft({
+        id: status.id,
+        mode: status.mode,
+        ...(!!e.url && { location: e.url }),
+        canBackward: e.target.canGoBack(),
+        canForward: e.target.canGoForward(),
+        isLoading: e.target.isLoading(),
+      })(navigator.current);
+
+      if (JSON.stringify(navigator.current) !== JSON.stringify(res)) {
+        navigator.current = res;
+        setStatus(res);
+      }
     }
   };
 
-  const handleCheck = (e: any) => {
-    console.log(`## ${e.type}`);
-  };
-
   const init = () => {
-
-    const {current} = ref;
-    current.addEventListener("did-navigate", handleNavigate);
+    const { current } = ref;
+    current.addEventListener("load-commit", handleCheck);
+    current.addEventListener("will-navigate", handleCheck);
     current.addEventListener("did-navigate", handleCheck);
     current.addEventListener("did-navigate-in-page", handleCheck);
     current.addEventListener("will-navigate", handleCheck);
@@ -50,7 +61,8 @@ function Viewer() {
     current.addEventListener("did-finish-load", handleCheck);
 
     return () => {
-      current.removeEventListener("did-navigate", handleNavigate);
+      current.removeEventListener("load-commit", handleCheck);
+      current.removeEventListener("will-navigate", handleCheck);
       current.removeEventListener("did-navigate", handleCheck);
       current.removeEventListener("did-navigate-in-page", handleCheck);
       current.removeEventListener("will-navigate", handleCheck);
@@ -63,12 +75,16 @@ function Viewer() {
 
   useEffect(init, []);
 
+  useEffect(() => {
+    setViewer(ref.current);
+  }, [ref.current]);
+
   return (
-    <div css={styles.viewer}>
+    <div css={styles.container}>
       {jsx("webview", {
+        key: status.id,
         ref,
-        src: browser.location,
-        "data-updated-at": +new Date(),
+        src: status.location,
         ...config,
       })}
     </div>

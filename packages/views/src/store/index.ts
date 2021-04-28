@@ -16,15 +16,17 @@ const store = configureStore({
 
 let w = watch(store.getState, "browsers");
 store.subscribe(
-  w((newVal, oldVal, objectPath) => {
-    const state = Object.entries(store.getState().browsers).reduce((a, b) => {
-      const [key, value]: any = b;
+  w((state, oldVal, objectPath) => {
+    const frames = state.frames.map(({ id, location, mode }: any) => ({
+      id,
+      location,
+      mode,
+    }));
 
-      const { id, location } = value;
-      return { ...a, [key]: { id, location } };
-    }, {});
-
-    window.localStorage.setItem("__BROWSERS__", JSON.stringify(state));
+    window.localStorage.setItem(
+      "__BROWSERS__",
+      JSON.stringify({ ...state, frames })
+    );
   })
 );
 

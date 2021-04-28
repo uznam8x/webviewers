@@ -1,13 +1,27 @@
 import { createContext } from "react";
 
 type ContextType = {
-  browser: any;
-  isDesktop: boolean;
-  toggleDesktop: () => void;
+  id: string;
+  viewer: any;
+  setStatus: (state: any) => void;
+  setViewer: (viewer: any) => void;
+  goBackard: () => void;
+  goForward: () => void;
+  reload: () => void;
+  [key: string]: any;
 };
 
 export default createContext<ContextType>({
-  browser: {},
-  isDesktop: false,
-  toggleDesktop: () => {},
+  id: "",
+  viewer: {},
+  location: "",
+  isLoading: false,
+  isFullscreen: false,
+  canGoBackward: false,
+  canGoForward: false,
+  setStatus: () => {},
+  setViewer: (item: any) => {},
+  goBackard: () => {},
+  goForward: () => {},
+  reload: () => {},
 });

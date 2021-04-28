@@ -1,6 +1,6 @@
 {
   "name": "emulate",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "app.js",
   "author": "uznam8x",
   "license": "MIT",
@@ -44,8 +44,7 @@
     "files": [
       "build/**/*",
       "app.js",
-      "preload.js",
-      "navigator.js",
+      "src/**/*",
       "package.json"
     ]
   }
