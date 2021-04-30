@@ -13,11 +13,25 @@ export const blank = css`
   flex: 1;
 `;
 
-export const fullscreen = css`
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 99;
-`;
+export const fullscreen = css``;
+
+export const global = (id: string, isFullscreen: boolean) =>
+  isFullscreen
+    ? css`
+        [data-frame="${id}"] {
+          left: 0 !important;
+          top: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          z-index: 99 !important;
+          transform: none !important;
+          .react-dragable-handle {
+            visibility: hidden;
+            pointer-events: none;
+          }
+          .react-resizable-handle {
+            display: none;
+          }
+        }
+      `
+    : css``;

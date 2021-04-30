@@ -1,5 +1,6 @@
 const CracoAlias = require("craco-alias");
 const webpack = require("webpack");
+const pack = require("./package.json");
 module.exports = {
   plugins: [
     {
@@ -18,7 +19,11 @@ module.exports = {
     plugins: ["@emotion"],
   },
   webpack: {
-    plugins: [],
+    plugins: [
+      new webpack.DefinePlugin({
+        __VERSION__: `"${pack.version}"`,
+      }),
+    ],
 
     ...(process.env.NODE_ENV === "emulate" && {
       configure: {

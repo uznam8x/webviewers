@@ -5,7 +5,7 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { Col, Input, Row } from "antd";
-import { KeyboardEvent, useContext, useEffect, useState } from "react";
+import { Fragment, KeyboardEvent, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import context from "../context";
 import * as styles from "./styles";
@@ -48,7 +48,7 @@ function Toolbar({ children, onChange = () => {}, ...args }: Props) {
   useEffect(handleTextSync, [status.location]);
 
   return (
-    <div>
+    <Fragment>
       {view.toolbar && (
         <div css={styles.container}>
           <Row gutter={4} wrap={false}>
@@ -79,6 +79,7 @@ function Toolbar({ children, onChange = () => {}, ...args }: Props) {
             </Col>
             <Col flex={1}>
               <Input
+                className="webview__toolbar__search"
                 css={styles.search}
                 value={text}
                 onInput={(e: any) => {
@@ -95,7 +96,7 @@ function Toolbar({ children, onChange = () => {}, ...args }: Props) {
           </Row>
         </div>
       )}
-    </div>
+    </Fragment>
   );
 }
 

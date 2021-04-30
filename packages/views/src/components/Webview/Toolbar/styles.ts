@@ -4,7 +4,7 @@ export const container = css`
   position: relative;
   z-index: 9;
   padding: 8px;
-  background-color: #264653;
+  background-color: #11403A;
 `;
 
 const btn = css`

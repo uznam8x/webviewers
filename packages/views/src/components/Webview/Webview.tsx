@@ -1,13 +1,14 @@
+import { Global } from "@emotion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { DESTROY, FrameType, UPDATE } from "~/store/browsers";
+import { ACTIVATE } from "~/store/view";
 import Context from "./context";
 import StatusBar from "./StatusBar";
 import * as R from "ramda";
 import * as styles from "./styles";
 import Toolbar from "./Toolbar";
 import Viewer from "./Viewer";
-
 export type Props = {
   className?: string;
   children?: React.ReactNode;
@@ -31,6 +32,7 @@ function Webview({ value }: Props) {
   );
   const [viewer, setViewer] = useState<any>({ src: "about:blank" });
 
+  const ref = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
   const handleStatus = (payload: any) => {
@@ -81,6 +83,19 @@ function Webview({ value }: Props) {
       UPDATE({ id, mode, canBackward, canForward, isLoading, location })
     );
   }, [config.location, config.mode, config.id]);
+
+  const handleClick = () => {
+    dispatch(ACTIVATE(config.id));
+  };
+
+  const init = () => {
+    ref.current?.addEventListener("click", handleClick);
+    return () => {
+      ref.current?.removeEventListener("click", handleClick);
+    };
+  };
+  useEffect(init, [ref]);
+
   return (
     <Context.Provider
       value={{
@@ -94,15 +109,18 @@ function Webview({ value }: Props) {
         destroy: handleDestroy,
       }}
     >
-      <div css={[styles.container, config.isFullscreen && styles.fullscreen]}>
+      <Global styles={styles.global(config.id, config.isFullscreen)} />
+      <div
+        css={[styles.container, config.isFullscreen && styles.fullscreen]}
+        ref={ref}
+      >
+        <StatusBar />
         <Toolbar />
         {config.location === "about:blank" ? (
           <div css={styles.blank}></div>
         ) : (
           <Viewer />
         )}
-
-        <StatusBar />
       </div>
     </Context.Provider>
   );

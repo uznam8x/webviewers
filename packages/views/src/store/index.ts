@@ -17,7 +17,7 @@ const store = configureStore({
 let w = watch(store.getState, "browsers");
 store.subscribe(
   w((state, oldVal, objectPath) => {
-    const frames = state.frames.map(({ id, location, mode }: any) => ({
+    const frames = state.map(({ id, location, mode }: any) => ({
       id,
       location,
       mode,
@@ -25,7 +25,7 @@ store.subscribe(
 
     window.localStorage.setItem(
       "__BROWSERS__",
-      JSON.stringify({ ...state, frames })
+      JSON.stringify(frames)
     );
   })
 );

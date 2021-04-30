@@ -1,14 +1,13 @@
 import {
-  DesktopOutlined,
   CompressOutlined,
+  DesktopOutlined,
   ExpandOutlined,
-  LoadingOutlined,
+  LoadingOutlined
 } from "@ant-design/icons";
-import { memo, useContext } from "react";
+import * as R from "ramda";
+import { memo, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import context from "../context";
-import { Row, Col } from "antd";
-import * as R from "ramda";
 import * as styles from "./styles";
 
 export type Props = {
@@ -16,50 +15,73 @@ export type Props = {
 };
 
 function StatusBar({ children, ...args }: Props) {
-  const { view } = useSelector((state: any) => state);
+  const { view } = useSelector(
+    (state: any) => state,
+    (prev, next) => prev.view.statusbar === next.view.statusbar
+  );
+
   const { setStatus, ...status } = useContext(context);
+  const [index, setIndex] = useState(-1);
+
+  const [setting, setSetting] = useState<any>({
+    isFullscreen: status.isFullscreen,
+    mode: status.mode,
+  });
 
   const handleDesktop = () => {
-    const res = R.mergeDeepLeft({
-      mode: status.mode === "mobile" ? "desktop" : "mobile",
-    })(status);
-
-    setStatus(res);
+    setSetting((state: any) =>
+      R.mergeDeepLeft({
+        mode: status.mode === "mobile" ? "desktop" : "mobile",
+      })(state)
+    );
   };
   const handleFullscreen = () => {
-    const res = R.mergeDeepLeft({
-      isFullscreen: !status.isFullscreen,
-    })(status);
-    setStatus(res);
+    setSetting((state: any) =>
+      R.mergeDeepLeft({
+        isFullscreen: !state.isFullscreen,
+      })(state)
+    );
   };
 
+  const handleSync = () => {
+    setStatus(setting);
+  };
+
+  useEffect(handleSync, [setting.mode, setting.isFullscreen]);
+
+  const handleArrange = (e: any) => {
+    const idx = R.findIndex((v: any) => v.i === status.id)(e.detail);
+    setIndex(() => idx);
+  };
+  const init = () => {
+    window.addEventListener("ARRANGE", handleArrange);
+    return () => {
+      window.removeEventListener("ARRANGE", handleArrange);
+    };
+  };
+  useEffect(init, [index]);
+
   return view.statusbar ? (
-    <div css={styles.container} {...args}>
-      <Row align="middle" wrap={false}>
-        <Col css={styles.loading}>
-          <LoadingOutlined />
-        </Col>
-        <Col css={styles.title}>{status.title}</Col>
-        <Col flex={1}></Col>
-        <Col>
-          <button
-            type="button"
-            css={[styles.button, styles.desktop(status.mode === "desktop")]}
-            onClick={handleDesktop}
-          >
-            <DesktopOutlined />
-          </button>
-        </Col>
-        <Col>
-          <button
-            type="button"
-            css={[styles.button, styles.fullscreen(status.isFullscreen)]}
-            onClick={handleFullscreen}
-          >
-            {status.isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
-          </button>
-        </Col>
-      </Row>
+    <div css={styles.container} {...args} className="webview__status-bar">
+      <button
+        type="button"
+        css={styles.handle}
+        className="react-dragable-handle"
+      ></button>
+      <div css={styles.title}>
+        {index > -1 && <span>[{index+1}]</span>}
+        <LoadingOutlined /> <span>{status.title}</span>
+      </div>
+      <div css={styles.desktop(status.mode === "desktop")}>
+        <button type="button" css={[styles.button]} onClick={handleDesktop}>
+          <DesktopOutlined />
+        </button>
+      </div>
+      <div css={styles.fullscreen(status.isFullscreen)}>
+        <button type="button" css={[styles.button]} onClick={handleFullscreen}>
+          {status.isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
+        </button>
+      </div>
     </div>
   ) : null;
 }

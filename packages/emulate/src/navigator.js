@@ -1,23 +1,24 @@
-const { app, Menu } = require("electron");
+const { app, Menu, BrowserWindow } = require("electron");
+const about = require("./pages/about");
 function navigator(window) {
-  const menu = Menu.buildFromTemplate([
+  return Menu.buildFromTemplate([
     {
-      label: "Webviews",
+      role: "window",
       submenu: [
         {
-          label: "Preference",
-          accelerator: "Command+,",
+          label: "About Webviews",
           click: () => {
-            window.webContents.send("app.preference", {});
+            about(window);
           },
         },
+        { role: "close" },
         {
           label: "Quit",
           accelerator: "Command+Q",
           click: () => {
             app.quit();
           },
-        }
+        },
       ],
     },
     {
@@ -30,6 +31,26 @@ function navigator(window) {
             window.webContents.send("app.add.browser", {});
           },
         },
+
+        {
+          label: "Jump to the address bar",
+          accelerator: "Command+L",
+          click: () => {
+            window.webContents.send("app.file.jump_address", {});
+          },
+        },
+        {
+          role: "separator",
+        },
+        ...Array(8)
+          .fill(0)
+          .map((value, index) => ({
+            label: `Activate ${index + 1}`,
+            accelerator: `Command+${index + 1}`,
+            click: () => {
+              window.webContents.send("app.file.activate", { index });
+            },
+          })),
       ],
     },
     {
@@ -70,6 +91,13 @@ function navigator(window) {
             window.webContents.send("app.tools.clear_cache", {});
           },
         },
+        {
+          label: "Open devtools",
+          accelerator: "Ctrl+Command+D",
+          click: () => {
+            window.webContents.openDevTools();
+          },
+        },
       ],
     },
     {
@@ -89,6 +117,5 @@ function navigator(window) {
       ],
     },
   ]);
-  Menu.setApplicationMenu(menu);
 }
 module.exports = navigator;

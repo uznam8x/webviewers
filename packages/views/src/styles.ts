@@ -7,8 +7,6 @@ export const container = css`
 export const row = css`
   height: 100%;
   position: relative;
-  padding: 0;
-  margin: -1px -1px;
 `;
 export const col = css`
   position: absolute;
@@ -38,3 +36,5 @@ export const button = css`
   text-align: center;
   cursor: pointer;
 `;
+
+
